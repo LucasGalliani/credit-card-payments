@@ -2,9 +2,11 @@ package com.lucasgalliani.credit_card_payments.service;
 
 
 import com.lucasgalliani.credit_card_payments.dto.TransacaoDto;
+import com.lucasgalliani.credit_card_payments.dto.TransacaoResponseDto;
 import com.lucasgalliani.credit_card_payments.enums.StatusTransacao;
 import com.lucasgalliani.credit_card_payments.exception.EntityNotFoundException;
 import com.lucasgalliani.credit_card_payments.exception.TransacaoNaoAutorizadaException;
+import com.lucasgalliani.credit_card_payments.mapper.TransacaoMapper;
 import com.lucasgalliani.credit_card_payments.model.FormaDePagamento;
 import com.lucasgalliani.credit_card_payments.model.Transacao;
 import com.lucasgalliani.credit_card_payments.repository.TransacaoRepository;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class TransacaoService {
@@ -22,13 +25,14 @@ public class TransacaoService {
     @Autowired
     private TransacaoRepository transacaoRepository;
 
+
     @Transactional
-    public Transacao processarPagamento(TransacaoDto dto) {
+    public TransacaoResponseDto processarPagamento(TransacaoDto dto) {
 
         Transacao transacao = new Transacao();
 
         transacao.setCartao(dto.cartao());
-        transacao.setValor(dto.valor());
+        transacao.setValor(dto.descricao().valor());
         transacao.setEstabelecimento(dto.descricao().estabelecimento());
         transacao.setDataHora(LocalDateTime.now());
         transacao.setNsu(gerarNSU());
@@ -40,6 +44,8 @@ public class TransacaoService {
         transacao.setFormaDePagamento(forma);
 
 
+        System.out.println("Valor da transação: " + transacao.getValor());
+        System.out.println("Status antes do save: " + transacao.getStatus());
 
         if (transacao.getValor() != null && transacao.getValor() > 0) {
             transacao.setStatus(StatusTransacao.AUTORIZADO);
@@ -47,31 +53,45 @@ public class TransacaoService {
             transacao.setStatus(StatusTransacao.NEGADO);
         }
 
-        return transacaoRepository.save(transacao);
+        Transacao save = transacaoRepository.save(transacao);
+
+        System.out.println("Status depois do save: " + save.getStatus());
+
+        return TransacaoMapper.toResponse(save);
 
     }
 
     @Transactional
-    public Transacao estornarPagamento(Long id) {
+    public TransacaoResponseDto estornarPagamento(Long id) {
 
         Transacao transacao = transacaoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Transação não encontrada!"));
 
+        System.out.println("Status da transacao no banco: " + transacao.getStatus());
+        System.out.println("Valor da transação: " + transacao.getValor());
+
         if (transacao.getStatus() == StatusTransacao.AUTORIZADO) {
             transacao.setStatus(StatusTransacao.CANCELADO);
-            return transacaoRepository.save(transacao);
+            Transacao save = transacaoRepository.save(transacao);
+            return TransacaoMapper.toResponse(save);
         } else {
             throw new TransacaoNaoAutorizadaException("Só é possível estornar transações autorizadas!");
         }
     }
 
-    public List<Transacao> listarTodos() {
-        return transacaoRepository.findAll();
+    public List<TransacaoResponseDto> listarTodos() {
+
+        return transacaoRepository.findAll()
+                .stream()
+                .map(TransacaoMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
-    public Transacao buscarPorId(Long id) {
-        return transacaoRepository.findById(id)
+    public TransacaoResponseDto buscarPorId(Long id) {
+        Transacao transacao = transacaoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Transação não encontrada!"));
+
+        return TransacaoMapper.toResponse(transacao);
     }
 
 

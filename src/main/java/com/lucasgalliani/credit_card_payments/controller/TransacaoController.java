@@ -1,6 +1,7 @@
 package com.lucasgalliani.credit_card_payments.controller;
 
 import com.lucasgalliani.credit_card_payments.dto.TransacaoDto;
+import com.lucasgalliani.credit_card_payments.dto.TransacaoResponseDto;
 import com.lucasgalliani.credit_card_payments.model.Transacao;
 import com.lucasgalliani.credit_card_payments.service.TransacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,22 +18,22 @@ public class TransacaoController {
     private TransacaoService transacaoService;
 
     @PostMapping("/pagamentos")
-    public ResponseEntity<Transacao> pagar(@RequestBody TransacaoDto transacaoDto) {
+    public ResponseEntity<TransacaoResponseDto> pagar(@RequestBody TransacaoDto transacaoDto) {
         return ResponseEntity.ok(transacaoService.processarPagamento(transacaoDto));
     }
 
     @PostMapping("/estornos/{id}")
-    public ResponseEntity<Transacao> estorno(@PathVariable Long id) {
+    public ResponseEntity<TransacaoResponseDto> estorno(@PathVariable Long id) {
         return ResponseEntity.ok(transacaoService.estornarPagamento(id));
     }
 
     @GetMapping("/transacoes")
-    public ResponseEntity<List<Transacao>> listar() {
+    public ResponseEntity<List<TransacaoResponseDto>> listar() {
         return ResponseEntity.ok(transacaoService.listarTodos());
     }
 
     @GetMapping("/transacoes/{id}")
-    public ResponseEntity<Transacao> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<TransacaoResponseDto> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(transacaoService.buscarPorId(id));
     }
 
