@@ -4,8 +4,8 @@ package com.lucasgalliani.credit_card_payments.service;
 import com.lucasgalliani.credit_card_payments.dto.TransacaoDto;
 import com.lucasgalliani.credit_card_payments.dto.TransacaoResponseDto;
 import com.lucasgalliani.credit_card_payments.enums.StatusTransacao;
-import com.lucasgalliani.credit_card_payments.exception.EntityNotFoundException;
-import com.lucasgalliani.credit_card_payments.exception.TransacaoNaoAutorizadaException;
+import com.lucasgalliani.credit_card_payments.infra.exception.EntityNotFoundException;
+import com.lucasgalliani.credit_card_payments.infra.exception.TransacaoNaoAutorizadaException;
 import com.lucasgalliani.credit_card_payments.mapper.TransacaoMapper;
 import com.lucasgalliani.credit_card_payments.model.FormaDePagamento;
 import com.lucasgalliani.credit_card_payments.model.Transacao;
@@ -44,8 +44,6 @@ public class TransacaoService {
         transacao.setFormaDePagamento(forma);
 
 
-        System.out.println("Valor da transação: " + transacao.getValor());
-        System.out.println("Status antes do save: " + transacao.getStatus());
 
         if (transacao.getValor() != null && transacao.getValor() > 0) {
             transacao.setStatus(StatusTransacao.AUTORIZADO);
@@ -67,8 +65,6 @@ public class TransacaoService {
         Transacao transacao = transacaoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Transação não encontrada!"));
 
-        System.out.println("Status da transacao no banco: " + transacao.getStatus());
-        System.out.println("Valor da transação: " + transacao.getValor());
 
         if (transacao.getStatus() == StatusTransacao.AUTORIZADO) {
             transacao.setStatus(StatusTransacao.CANCELADO);

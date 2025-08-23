@@ -1,4 +1,4 @@
-package com.lucasgalliani.credit_card_payments.exception;
+package com.lucasgalliani.credit_card_payments.infra.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
