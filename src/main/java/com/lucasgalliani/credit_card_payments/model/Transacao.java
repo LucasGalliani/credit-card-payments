@@ -4,7 +4,7 @@ import com.lucasgalliani.credit_card_payments.enums.StatusTransacao;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tb_transacao")
@@ -15,10 +15,13 @@ import java.time.LocalDate;
 @EqualsAndHashCode(of = {"id"})
 public class Transacao {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String cartao;
     private String estabelecimento;
-    private LocalDate dataHora;
+    private LocalDateTime dataHora;
+    private Double valor;
     private String nsu;
     private String codigoAutorizacao;
     @Enumerated(EnumType.STRING)
